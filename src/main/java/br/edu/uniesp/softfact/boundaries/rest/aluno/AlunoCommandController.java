@@ -34,6 +34,17 @@ public class AlunoCommandController {
     @PutMapping("/{id}")
     public AlunoResponse atualizar(@PathVariable Long id, @RequestBody @Valid AlunoUpdateRequest request) {
         var dominio = updateMapper.toDomain(request);
+        // Configurar stacks se foram fornecidas
+        if (request.stacksIds() != null && !request.stacksIds().isEmpty()) {
+            var stacks = request.stacksIds().stream()
+                    .map(stackId -> {
+                        var stack = new br.edu.uniesp.softfact.zo.old.stack.StackTecnologia();
+                        stack.setId(stackId);
+                        return stack;
+                    })
+                    .collect(java.util.stream.Collectors.toSet());
+            dominio.setStacks(stacks);
+        }
         return service.atualizar(id, dominio);
     }
 

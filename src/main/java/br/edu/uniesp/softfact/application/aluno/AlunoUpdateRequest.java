@@ -15,10 +15,8 @@ public record AlunoUpdateRequest(
         String email,
         String telefone,
         @NotNull Curso curso,
-        @NotBlank String
-        matricula,
+        @NotBlank String matricula,
         @NotNull
         Periodo periodo,
-        Set<Long>
-        stacksIds
+        Set<Long> stacksIds
 ) {}

@@ -50,7 +50,11 @@ public class UpdateAlunoServiceImpl implements UpdateAlunoService {
         existente.setCurso(dto.getCurso());
         existente.setMatricula(dto.getMatricula());
         existente.setPeriodo(dto.getPeriodo());
-        existente.setStacks(buscarStacks(dto.getStacks().stream().map(StackTecnologia::getId).collect(Collectors.toSet())));
+        
+        // Atualizar stacks apenas se foram fornecidas
+        if (dto.getStacks() != null) {
+            existente.setStacks(buscarStacks(dto.getStacks().stream().map(StackTecnologia::getId).collect(Collectors.toSet())));
+        }
 
         return entityMapper.toResponse(existente);
     }
