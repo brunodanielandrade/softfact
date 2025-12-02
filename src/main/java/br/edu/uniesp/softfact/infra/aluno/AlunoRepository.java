@@ -19,7 +19,7 @@ public interface AlunoRepository extends JpaRepository<AlunoEntity, Long> {
     Page<AlunoEntity> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     Page<AlunoEntity> findByNomeContainingIgnoreCaseAndPeriodoIn(
             String nome, Collection<Periodo> periodos, Pageable pageable);
-    Page<AlunoEntity> findDistinctByStacks_NomeInIgnoreCase(Collection<String> nomesStacks, Pageable pageable);
+    // Método removido - stacks agora são gerenciadas via projetos
 
     // JPQL com @Query
 //    @Query("""

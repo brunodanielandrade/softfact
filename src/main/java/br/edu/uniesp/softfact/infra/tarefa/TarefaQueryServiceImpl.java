@@ -35,7 +35,7 @@ public class TarefaQueryServiceImpl implements TarefaQueryService {
                 entity.getTitulo(),
                 entity.getDescricao(),
                 entity.getDataEntrega(),
-                entity.isConcluida()
+                entity.getStatus().name().equals("CONCLUIDA")
         );
     }
 }

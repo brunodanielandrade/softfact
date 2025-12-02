@@ -58,8 +58,8 @@ public class AlunoQueryServiceImpl implements AlunoQueryService {
                 a.getCurso(),
                 a.getMatricula(),
                 a.getPeriodo(),
-                a.getStacks().stream()
-                        .map(s -> new StackResumo(s.getId(), s.getNome(), s.getCategoria()))
+                a.getProjetos().stream()
+                        .map(p -> new StackResumo(p.getId(), p.getNome(), "Projeto"))
                         .collect(Collectors.toSet())
         );
     }

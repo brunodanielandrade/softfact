@@ -1,44 +1,55 @@
 package br.edu.uniesp.softfact.infra.tarefa;
+
+import br.edu.uniesp.softfact.infra.aluno.AlunoEntity;
+import br.edu.uniesp.softfact.shared.entity.BaseEntity;
+import br.edu.uniesp.softfact.shared.enums.PrioridadeTarefa;
+import br.edu.uniesp.softfact.shared.enums.StatusTarefa;
 import jakarta.persistence.*;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDate;
 
+@Getter @Setter
 @Entity
-@Table(name = "tarefas")
-public class TarefaEntity {
+@Table(name = "tb_tarefa")
+@NoArgsConstructor @AllArgsConstructor @Builder
+public class TarefaEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
+    @NotBlank
+    @Column(nullable = false, length = 200)
     private String titulo;
+
+    @Column(length = 1000)
     private String descricao;
+
+    @NotNull
+    @Column(name = "data_entrega", nullable = false)
     private LocalDate dataEntrega;
-    private boolean concluida;
 
-    public TarefaEntity() {}
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusTarefa status = StatusTarefa.PENDENTE;
 
-    public TarefaEntity(Long id, String titulo, String descricao, LocalDate dataEntrega, boolean concluida) {
-        this.id = id;
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.dataEntrega = dataEntrega;
-        this.concluida = concluida;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PrioridadeTarefa prioridade = PrioridadeTarefa.MEDIA;
 
-    // GETTERS
-    public Long getId() { return id; }
-    public String getTitulo() { return titulo; }
-    public String getDescricao() { return descricao; }
-    public LocalDate getDataEntrega() { return dataEntrega; }
-    public boolean isConcluida() { return concluida; }
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "projeto_id", nullable = false)
+    private br.edu.uniesp.softfact.infra.projeto.ProjetoEntity projeto;
 
+    @ManyToOne
+    @JoinColumn(name = "responsavel_id")
+    private AlunoEntity responsavel;
 
-    public void setConcluida(boolean concluida) {
-    }
-
-    public void setDescricao(String descricao) {
-    }
+    @Column(name = "observacoes", length = 500)
+    private String observacoes;
 }

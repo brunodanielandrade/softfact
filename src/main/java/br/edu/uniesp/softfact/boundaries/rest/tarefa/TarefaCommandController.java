@@ -22,7 +22,7 @@ public class TarefaCommandController {
 
     @PutMapping("/{id}")
     public TarefaResponse atualizar(@PathVariable Long id,
-                                    @Valid @RequestBody TarefaUpdateRequest request) {
+                                    @RequestBody TarefaUpdateRequest request) {
         request.setId(id);
         return service.update(request);
     }

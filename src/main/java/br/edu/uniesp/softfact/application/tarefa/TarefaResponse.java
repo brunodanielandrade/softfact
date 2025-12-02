@@ -1,18 +1,21 @@
 package br.edu.uniesp.softfact.application.tarefa;
-import java.time.LocalDate;
 
-
-import lombok.Builder;
-import lombok.Data;
+import br.edu.uniesp.softfact.shared.enums.PrioridadeTarefa;
+import br.edu.uniesp.softfact.shared.enums.StatusTarefa;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Data
-@Builder
-public class TarefaResponse {
-    private Long id;
-    private String titulo;
-    private String descricao;
-    private LocalDate dataEntrega;
-    private boolean concluida;
-}
+public record TarefaResponse(
+        Long id,
+        String titulo,
+        String descricao,
+        LocalDate dataEntrega,
+        StatusTarefa status,
+        PrioridadeTarefa prioridade,
+        Long alunoId,
+        String alunoNome,
+        String observacoes,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {}

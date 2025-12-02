@@ -3,20 +3,21 @@ spring:
     url: jdbc:postgresql://localhost:5432/softfact_db
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: adm
-
+    password: postgres
+    
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
-
+    
   flyway:
     enabled: false
-
+    
 logging:
   level:
     org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace

@@ -1,9 +1,10 @@
 package br.edu.uniesp.softfact.infra.aluno;
 
+import br.edu.uniesp.softfact.infra.stack.StackEntity;
+import br.edu.uniesp.softfact.infra.tarefa.TarefaEntity;
+import br.edu.uniesp.softfact.shared.entity.BaseEntity;
 import br.edu.uniesp.softfact.shared.enums.Curso;
 import br.edu.uniesp.softfact.shared.enums.Periodo;
-import br.edu.uniesp.softfact.zo.old.certificado.Certificado;
-import br.edu.uniesp.softfact.zo.old.stack.StackTecnologia;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -14,25 +15,26 @@ import java.util.Set;
 
 @Getter @Setter
 @Entity
-@Table(name = "tb_softfact_aluno",
+@Table(name = "tb_aluno",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_aluno_email", columnNames = "email"),
                 @UniqueConstraint(name = "uk_aluno_matricula", columnNames = "matricula")
         })
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class AlunoEntity {
+public class AlunoEntity extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String nome;
 
     @Email
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String email;
 
+    @Column(length = 20)
     private String telefone;
 
     @Enumerated(EnumType.STRING)
@@ -40,19 +42,16 @@ public class AlunoEntity {
     private Curso curso;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String matricula;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Periodo periodo;
 
-    @ManyToMany
-    @JoinTable(name = "tb_softfact_aluno_stack",
-            joinColumns = @JoinColumn(name = "aluno_id"),
-            inverseJoinColumns = @JoinColumn(name = "stack_id"))
-    private Set<StackTecnologia> stacks = new HashSet<>();
+    @ManyToMany(mappedBy = "alunos")
+    private Set<br.edu.uniesp.softfact.infra.projeto.ProjetoEntity> projetos = new HashSet<>();
 
-    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Certificado> certificados = new HashSet<>();
+    @OneToMany(mappedBy = "responsavel")
+    private Set<TarefaEntity> tarefasResponsavel = new HashSet<>();
 }

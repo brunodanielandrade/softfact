@@ -1,13 +1,11 @@
 package br.edu.uniesp.softfact.infra.tarefa;
 
-
-
 import br.edu.uniesp.softfact.application.tarefa.TarefaCreateRequest;
 import br.edu.uniesp.softfact.application.tarefa.TarefaResponse;
 import br.edu.uniesp.softfact.application.tarefa.TarefaUpdateRequest;
-import br.edu.uniesp.softfact.domain.aluno.tarefa.Tarefa;
 import br.edu.uniesp.softfact.domain.aluno.tarefa.UpdateTarefaService;
-import br.edu.uniesp.softfact.infra.mapper.TarefaEntityMapper;
+import br.edu.uniesp.softfact.infra.aluno.AlunoRepository;
+import br.edu.uniesp.softfact.infra.projeto.ProjetoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,31 +17,86 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateTarefaServiceImpl implements UpdateTarefaService {
 
     private final TarefaRepository repository;
-    private final TarefaEntityMapper mapper;
+    private final ProjetoRepository projetoRepository;
+    private final AlunoRepository alunoRepository;
 
     @Override
     public TarefaResponse create(TarefaCreateRequest request) {
-        Tarefa domain = mapper.toDomain(request);
-
-        TarefaEntity entity = mapper.toEntity(domain);
-        TarefaEntity saved = repository.save(entity);
-
-        return mapper.toResponse(saved);
+        var entity = new TarefaEntity();
+        entity.setTitulo(request.titulo());
+        entity.setDescricao(request.descricao());
+        entity.setDataEntrega(request.dataEntrega());
+        entity.setObservacoes(request.observacoes());
+        
+        // Buscar e setar projeto
+        var projeto = projetoRepository.findById(request.projetoId())
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado: " + request.projetoId()));
+        entity.setProjeto(projeto);
+        
+        // Buscar e setar responsável
+        var responsavel = alunoRepository.findById(request.responsavelId())
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado: " + request.responsavelId()));
+        entity.setResponsavel(responsavel);
+        
+        var saved = repository.save(entity);
+        
+        return new TarefaResponse(
+                saved.getId(),
+                saved.getTitulo(),
+                saved.getDescricao(),
+                saved.getDataEntrega(),
+                saved.getStatus(),
+                saved.getPrioridade(),
+                saved.getProjeto().getId(),
+                saved.getResponsavel().getNome(),
+                saved.getObservacoes(),
+                saved.getCreatedAt(),
+                saved.getUpdatedAt()
+        );
     }
 
     @Override
     public TarefaResponse update(TarefaUpdateRequest request) {
-
-        TarefaEntity existente = repository.findById(request.getId())
+        var existente = repository.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Tarefa não encontrada: " + request.getId()));
 
-        Tarefa domain = mapper.toDomain(request);
-
-        mapper.updateEntityFromDomain(domain, existente);
-
-        TarefaEntity atualizado = repository.save(existente);
-
-        return mapper.toResponse(atualizado);
+        if (request.getTitulo() != null && !request.getTitulo().trim().isEmpty()) {
+            existente.setTitulo(request.getTitulo());
+        }
+        if (request.getDescricao() != null) {
+            existente.setDescricao(request.getDescricao());
+        }
+        if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+            existente.setStatus(br.edu.uniesp.softfact.shared.enums.StatusTarefa.valueOf(request.getStatus().toUpperCase()));
+        }
+        
+        if (request.getStackId() != null) {
+            var projeto = projetoRepository.findById(request.getStackId())
+                    .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado: " + request.getStackId()));
+            existente.setProjeto(projeto);
+        }
+        
+        if (request.getAlunoId() != null) {
+            var responsavel = alunoRepository.findById(request.getAlunoId())
+                    .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado: " + request.getAlunoId()));
+            existente.setResponsavel(responsavel);
+        }
+        
+        var atualizado = repository.save(existente);
+        
+        return new TarefaResponse(
+                atualizado.getId(),
+                atualizado.getTitulo(),
+                atualizado.getDescricao(),
+                atualizado.getDataEntrega(),
+                atualizado.getStatus(),
+                atualizado.getPrioridade(),
+                atualizado.getProjeto().getId(),
+                atualizado.getResponsavel().getNome(),
+                atualizado.getObservacoes(),
+                atualizado.getCreatedAt(),
+                atualizado.getUpdatedAt()
+        );
     }
 
     @Override
