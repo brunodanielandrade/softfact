@@ -1,72 +1,77 @@
 package br.edu.uniesp.softfact.infra.aluno;
 
+import br.edu.uniesp.softfact.application.aluno.AlunoCreateRequest;
 import br.edu.uniesp.softfact.application.aluno.AlunoResponse;
-import br.edu.uniesp.softfact.domain.aluno.Aluno;
+import br.edu.uniesp.softfact.application.aluno.AlunoUpdateRequest;
 import br.edu.uniesp.softfact.domain.aluno.UpdateAlunoService;
-import br.edu.uniesp.softfact.infra.mapper.AlunoEntityMapper;
-import br.edu.uniesp.softfact.zo.old.stack.StackTecRepository;
-import br.edu.uniesp.softfact.zo.old.stack.StackTecnologia;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class UpdateAlunoServiceImpl implements UpdateAlunoService {
 
-    private final AlunoRepository repo;
-    private final StackTecRepository stackRepo;
-    private final AlunoEntityMapper entityMapper;
+    private final AlunoRepository repository;
 
     @Override
-    public AlunoResponse criar(Aluno dto) {
-        if (repo.existsByEmail(dto.getEmail())) {
-            throw new DataIntegrityViolationException("E-mail já cadastrado.");
-        }
-        return entityMapper.toResponse(repo.save(entityMapper.toEntity(dto)));
+    public AlunoResponse criar(AlunoCreateRequest request) {
+        var entity = AlunoEntity.builder()
+                .nome(request.nome())
+                .email(request.email())
+                .telefone(request.telefone())
+                .curso(request.curso())
+                .matricula(request.matricula())
+                .periodo(request.periodo())
+                .build();
+        
+        var saved = repository.save(entity);
+        return new AlunoResponse(
+                saved.getId(),
+                saved.getNome(),
+                saved.getEmail(),
+                saved.getTelefone(),
+                saved.getCurso(),
+                saved.getMatricula(),
+                saved.getPeriodo(),
+                saved.getCreatedAt(),
+                saved.getUpdatedAt()
+        );
     }
 
     @Override
-    public AlunoResponse atualizar(Long id, Aluno dto) {
-        AlunoEntity existente = repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado: " + id));
+    public AlunoResponse atualizar(Long id, AlunoUpdateRequest request) {
+        var existente = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado com ID: " + id));
 
-        if (!existente.getEmail().equalsIgnoreCase(dto.getEmail()) && repo.existsByEmail(dto.getEmail())) {
-            throw new DataIntegrityViolationException("E-mail já cadastrado.");
-        }
-        if (!existente.getMatricula().equalsIgnoreCase(dto.getMatricula()) && repo.existsByMatricula(dto.getMatricula())) {
-            throw new DataIntegrityViolationException("Matrícula já cadastrada.");
-        }
+        if (request.nome() != null) existente.setNome(request.nome());
+        if (request.email() != null) existente.setEmail(request.email());
+        if (request.telefone() != null) existente.setTelefone(request.telefone());
+        if (request.curso() != null) existente.setCurso(request.curso());
+        if (request.matricula() != null) existente.setMatricula(request.matricula());
+        if (request.periodo() != null) existente.setPeriodo(request.periodo());
 
-        existente.setNome(dto.getNome());
-        existente.setEmail(dto.getEmail());
-        existente.setTelefone(dto.getTelefone());
-        existente.setCurso(dto.getCurso());
-        existente.setMatricula(dto.getMatricula());
-        existente.setPeriodo(dto.getPeriodo());
-        
-        // Projetos são gerenciados separadamente
-
-        return entityMapper.toResponse(existente);
+        var atualizado = repository.save(existente);
+        return new AlunoResponse(
+                atualizado.getId(),
+                atualizado.getNome(),
+                atualizado.getEmail(),
+                atualizado.getTelefone(),
+                atualizado.getCurso(),
+                atualizado.getMatricula(),
+                atualizado.getPeriodo(),
+                atualizado.getCreatedAt(),
+                atualizado.getUpdatedAt()
+        );
     }
 
     @Override
     public void excluir(Long id) {
-        if (!repo.existsById(id)) throw new EntityNotFoundException("Aluno não encontrado: " + id);
-        repo.deleteById(id);
-    }
-
-    private Set<StackTecnologia> buscarStacks(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Set.of();
-        return ids.stream()
-                .map(id -> stackRepo.findById(id)
-                        .orElseThrow(() -> new EntityNotFoundException("Stack não encontrada: " + id)))
-                .collect(Collectors.toSet());
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Aluno não encontrado com ID: " + id);
+        }
+        repository.deleteById(id);
     }
 }

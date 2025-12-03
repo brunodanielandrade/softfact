@@ -3,18 +3,10 @@ package br.edu.uniesp.softfact.boundaries.rest.aluno;
 import br.edu.uniesp.softfact.application.aluno.AlunoCreateRequest;
 import br.edu.uniesp.softfact.application.aluno.AlunoResponse;
 import br.edu.uniesp.softfact.application.aluno.AlunoUpdateRequest;
-import br.edu.uniesp.softfact.application.mappers.AlunoCreateMapper;
-import br.edu.uniesp.softfact.application.mappers.AlunoUpdateMapper;
 import br.edu.uniesp.softfact.domain.aluno.UpdateAlunoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/alunos")
@@ -22,30 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AlunoCommandController {
 
     private final UpdateAlunoService service;
-    private final AlunoCreateMapper createMapper;
-    private final AlunoUpdateMapper updateMapper;
 
     @PostMapping
     public AlunoResponse criar(@RequestBody @Valid AlunoCreateRequest request) {
-        var dominio = createMapper.toDomain(request);
-        return service.criar(dominio);
+        return service.criar(request);
     }
 
     @PutMapping("/{id}")
     public AlunoResponse atualizar(@PathVariable Long id, @RequestBody @Valid AlunoUpdateRequest request) {
-        var dominio = updateMapper.toDomain(request);
-        // Configurar stacks se foram fornecidas
-        if (request.stacksIds() != null && !request.stacksIds().isEmpty()) {
-            var stacks = request.stacksIds().stream()
-                    .map(stackId -> {
-                        var stack = new br.edu.uniesp.softfact.zo.old.stack.StackTecnologia();
-                        stack.setId(stackId);
-                        return stack;
-                    })
-                    .collect(java.util.stream.Collectors.toSet());
-            dominio.setStacks(stacks);
-        }
-        return service.atualizar(id, dominio);
+        return service.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")

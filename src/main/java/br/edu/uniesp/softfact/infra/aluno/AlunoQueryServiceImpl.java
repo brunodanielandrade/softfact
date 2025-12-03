@@ -2,65 +2,43 @@ package br.edu.uniesp.softfact.infra.aluno;
 
 import br.edu.uniesp.softfact.application.aluno.AlunoResponse;
 import br.edu.uniesp.softfact.domain.aluno.AlunoQueryService;
-import br.edu.uniesp.softfact.zo.old.stack.dto.StackResumo;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AlunoQueryServiceImpl implements AlunoQueryService {
 
-    private final AlunoRepository repo;
+    private final AlunoRepository repository;
 
-    @Transactional(readOnly = true)
     @Override
-    public AlunoResponse buscarPorId(Long id) {
-        return repo.findById(id).map(this::toResponse)
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado: " + id));
+    public List<AlunoResponse> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public Page<AlunoResponse> listar(String termo, Pageable pageable) {
-        Page<AlunoEntity> page;
-        if (termo == null || termo.isBlank()) {
-            page = repo.findAll(pageable);
-        } else {
-            ExampleMatcher matcher = ExampleMatcher.matchingAny()
-                    .withIgnoreNullValues()
-                    .withMatcher("nome", m -> m.contains().ignoreCase())
-                    .withMatcher("email", m -> m.contains().ignoreCase())
-                    .withMatcher("matricula", m -> m.contains().ignoreCase());
-            AlunoEntity probe = new AlunoEntity();
-            probe.setNome(termo);
-            probe.setEmail(termo);
-            probe.setMatricula(termo);
-            page = repo.findAll(Example.of(probe, matcher), pageable);
-        }
-        return page.map(this::toResponse);
+    public AlunoResponse findById(Long id) {
+        return repository.findById(id)
+                .map(this::toResponse)
+                .orElse(null);
     }
 
-    private AlunoResponse toResponse(AlunoEntity a) {
+    private AlunoResponse toResponse(AlunoEntity entity) {
         return new AlunoResponse(
-                a.getId(),
-                a.getNome(),
-                a.getEmail(),
-                a.getTelefone(),
-                a.getCurso(),
-                a.getMatricula(),
-                a.getPeriodo(),
-                a.getProjetos().stream()
-                        .map(p -> new StackResumo(p.getId(), p.getNome(), "Projeto"))
-                        .collect(Collectors.toSet())
+                entity.getId(),
+                entity.getNome(),
+                entity.getEmail(),
+                entity.getTelefone(),
+                entity.getCurso(),
+                entity.getMatricula(),
+                entity.getPeriodo(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
     }
 }

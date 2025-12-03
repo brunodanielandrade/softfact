@@ -7,7 +7,7 @@ import lombok.*;
 
 @Getter @Setter
 @Entity
-@Table(name = "tb_stack", uniqueConstraints = {
+@Table(name = "tb_softfact_stack", uniqueConstraints = {
         @UniqueConstraint(name = "uk_stack_nome", columnNames = "nome")
 })
 @NoArgsConstructor @AllArgsConstructor @Builder

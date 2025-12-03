@@ -1,6 +1,5 @@
 package br.edu.uniesp.softfact.infra.aluno;
 
-import br.edu.uniesp.softfact.infra.stack.StackEntity;
 import br.edu.uniesp.softfact.infra.tarefa.TarefaEntity;
 import br.edu.uniesp.softfact.shared.entity.BaseEntity;
 import br.edu.uniesp.softfact.shared.enums.Curso;
@@ -54,4 +53,7 @@ public class AlunoEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "responsavel")
     private Set<TarefaEntity> tarefasResponsavel = new HashSet<>();
+
+    @OneToMany(mappedBy = "aluno")
+    private Set<br.edu.uniesp.softfact.infra.certificado.CertificadoEntity> certificados = new HashSet<>();
 }

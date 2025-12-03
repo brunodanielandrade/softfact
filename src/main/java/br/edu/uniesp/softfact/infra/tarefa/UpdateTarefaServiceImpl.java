@@ -28,12 +28,14 @@ public class UpdateTarefaServiceImpl implements UpdateTarefaService {
         entity.setDataEntrega(request.dataEntrega());
         entity.setObservacoes(request.observacoes());
         
-        // Buscar e setar projeto
+        if (request.prioridade() != null) {
+            entity.setPrioridade(request.prioridade());
+        }
+        
         var projeto = projetoRepository.findById(request.projetoId())
                 .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado: " + request.projetoId()));
         entity.setProjeto(projeto);
         
-        // Buscar e setar responsável
         var responsavel = alunoRepository.findById(request.responsavelId())
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado: " + request.responsavelId()));
         entity.setResponsavel(responsavel);
@@ -66,13 +68,22 @@ public class UpdateTarefaServiceImpl implements UpdateTarefaService {
         if (request.getDescricao() != null) {
             existente.setDescricao(request.getDescricao());
         }
+        if (request.getDataEntrega() != null) {
+            existente.setDataEntrega(request.getDataEntrega());
+        }
         if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
             existente.setStatus(br.edu.uniesp.softfact.shared.enums.StatusTarefa.valueOf(request.getStatus().toUpperCase()));
         }
+        if (request.getPrioridade() != null) {
+            existente.setPrioridade(request.getPrioridade());
+        }
+        if (request.getObservacoes() != null) {
+            existente.setObservacoes(request.getObservacoes());
+        }
         
-        if (request.getStackId() != null) {
-            var projeto = projetoRepository.findById(request.getStackId())
-                    .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado: " + request.getStackId()));
+        if (request.getProjetoId() != null) {
+            var projeto = projetoRepository.findById(request.getProjetoId())
+                    .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado: " + request.getProjetoId()));
             existente.setProjeto(projeto);
         }
         
@@ -101,6 +112,9 @@ public class UpdateTarefaServiceImpl implements UpdateTarefaService {
 
     @Override
     public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Tarefa não encontrada: " + id);
+        }
         repository.deleteById(id);
     }
 }

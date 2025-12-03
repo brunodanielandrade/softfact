@@ -2,9 +2,7 @@ package br.edu.uniesp.softfact.application.aluno;
 
 import br.edu.uniesp.softfact.shared.enums.Curso;
 import br.edu.uniesp.softfact.shared.enums.Periodo;
-import br.edu.uniesp.softfact.zo.old.stack.dto.StackResumo;
-
-import java.util.Set;
+import java.time.LocalDateTime;
 
 public record AlunoResponse(
         Long id,
@@ -14,5 +12,6 @@ public record AlunoResponse(
         Curso curso,
         String matricula,
         Periodo periodo,
-        Set<StackResumo> stacks
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}

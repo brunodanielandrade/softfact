@@ -2,13 +2,10 @@ package br.edu.uniesp.softfact.boundaries.rest.stack;
 
 import br.edu.uniesp.softfact.application.stack.StackCreateRequest;
 import br.edu.uniesp.softfact.application.stack.StackResponse;
-import br.edu.uniesp.softfact.application.mappers.StackCreateMapper;
-import br.edu.uniesp.softfact.application.mappers.StackResponseMapper;
+import br.edu.uniesp.softfact.infra.stack.StackEntity;
 import br.edu.uniesp.softfact.infra.stack.StackRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,37 +14,51 @@ import org.springframework.web.bind.annotation.*;
 public class StackCommandController {
 
     private final StackRepository repository;
-    private final StackCreateMapper createMapper;
-    private final StackResponseMapper responseMapper;
 
     @PostMapping
-    public ResponseEntity<StackResponse> criar(@Valid @RequestBody StackCreateRequest request) {
-        var entity = createMapper.toEntity(request);
+    public StackResponse criar(@RequestBody @Valid StackCreateRequest request) {
+        var entity = StackEntity.builder()
+                .nome(request.nome())
+                .categoria(request.categoria())
+                .descricao(request.descricao())
+                .build();
+        
         var saved = repository.save(entity);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(responseMapper.toResponse(saved));
+        return new StackResponse(
+                saved.getId(),
+                saved.getNome(),
+                saved.getCategoria(),
+                saved.getDescricao(),
+                saved.getCreatedAt(),
+                saved.getUpdatedAt()
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StackResponse> atualizar(@PathVariable Long id, @Valid @RequestBody StackCreateRequest request) {
-        return repository.findById(id)
-                .map(existing -> {
-                    existing.setNome(request.nome());
-                    existing.setCategoria(request.categoria());
-                    existing.setDescricao(request.descricao());
-                    return repository.save(existing);
-                })
-                .map(responseMapper::toResponse)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public StackResponse atualizar(@PathVariable Long id, @RequestBody StackCreateRequest request) {
+        var existente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Stack não encontrada: " + id));
+        
+        if (request.nome() != null) existente.setNome(request.nome());
+        if (request.categoria() != null) existente.setCategoria(request.categoria());
+        if (request.descricao() != null) existente.setDescricao(request.descricao());
+        
+        var atualizado = repository.save(existente);
+        return new StackResponse(
+                atualizado.getId(),
+                atualizado.getNome(),
+                atualizado.getCategoria(),
+                atualizado.getDescricao(),
+                atualizado.getCreatedAt(),
+                atualizado.getUpdatedAt()
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.noContent().build();
+    public void deletar(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Stack não encontrada: " + id);
         }
-        return ResponseEntity.notFound().build();
+        repository.deleteById(id);
     }
 }

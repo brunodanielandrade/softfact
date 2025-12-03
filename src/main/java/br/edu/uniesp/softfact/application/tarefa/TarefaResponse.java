@@ -13,8 +13,8 @@ public record TarefaResponse(
         LocalDate dataEntrega,
         StatusTarefa status,
         PrioridadeTarefa prioridade,
-        Long alunoId,
-        String alunoNome,
+        Long projetoId,
+        String responsavelNome,
         String observacoes,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

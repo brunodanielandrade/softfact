@@ -44,7 +44,6 @@ public class ProjetoController {
                 .dataFim(request.get("dataFim") != null ? LocalDate.parse((String) request.get("dataFim")) : null)
                 .build();
 
-        // Adicionar alunos
         if (request.get("alunoIds") != null) {
             @SuppressWarnings("unchecked")
             var alunoIds = (List<Integer>) request.get("alunoIds");
@@ -52,7 +51,6 @@ public class ProjetoController {
             projeto.getAlunos().addAll(alunos);
         }
 
-        // Adicionar stacks
         if (request.get("stackIds") != null) {
             @SuppressWarnings("unchecked")
             var stackIds = (List<Integer>) request.get("stackIds");
@@ -81,7 +79,6 @@ public class ProjetoController {
                         existing.setDataFim(LocalDate.parse((String) request.get("dataFim")));
                     }
                     
-                    // Atualizar alunos
                     if (request.get("alunoIds") != null) {
                         existing.getAlunos().clear();
                         @SuppressWarnings("unchecked")
@@ -90,7 +87,6 @@ public class ProjetoController {
                         existing.getAlunos().addAll(alunos);
                     }
                     
-                    // Atualizar stacks
                     if (request.get("stackIds") != null) {
                         existing.getStacks().clear();
                         @SuppressWarnings("unchecked")
